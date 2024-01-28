@@ -9,24 +9,23 @@ uint32_t asm_crc32c(const char *bytes, size_t len){
         len = strlen(bytes);
     }
 
-    int  result;
+    int64_t result;
     asm("mov %[result], 0xFFFFFFFF\n"
 
         "mov r9, %[len]\n"
-        "shr r9, 2\n"
-        "shl r9, 2\n"
+        "and r9b, 0b11111000\n"
 
         "mov rbx, %[data_pointer]\n"
         "add rbx, r9\n"
-        "not_done_4:\n"
+        "not_done_8:\n"
         "cmp %[data_pointer], rbx\n"
-        "je done_4\n"
+        "je done_8\n"
 
-        "crc32  %[result], dword ptr [%[data_pointer]]\n"
+        "crc32  %[result], qword ptr [%[data_pointer]]\n"
 
-        "add %[data_pointer], 4\n"
-        "jne not_done_4\n"
-        "done_4:\n"
+        "add %[data_pointer], 8\n"
+        "jne not_done_8\n"
+        "done_8:\n"
 
         "sub %[len], r9\n"
         "add rbx, %[len]\n"
