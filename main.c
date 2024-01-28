@@ -1,22 +1,15 @@
-#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 
-uint32_t asm_crc32c(unsigned const char *bytes, size_t len);
 
-int main() {
-    char * bytes = "AsdFJklof";
-    //char * bytes = "fdsA";
-    size_t len = strlen(bytes);
+uint32_t asm_crc32c(const char *bytes, size_t len){
+    if (!len) {
+        len = strlen(bytes);
+    }
 
-    printf("Bytes: %s, len: %ld, result: %x\n", bytes, len, asm_crc32c(bytes, len));
-    return 0;
-}
-// http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
-uint32_t asm_crc32c(unsigned const char *bytes, size_t len){
     int  result;
-
     asm("mov %[result], 0xFFFFFFFF\n"
 
         "mov r9, %[len]\n"
@@ -49,4 +42,15 @@ uint32_t asm_crc32c(unsigned const char *bytes, size_t len){
     return result^0xFFFFFFFF; // Compiler optimizes this to "not eax"
 }
 
+void test() {
+    // Test cases generated with https://crccalc.com/, Result in the CRC-32C algorithm
+    assert(asm_crc32c("AsdFJklo",0) ==0x5899CC2E) ;
+    assert(asm_crc32c("AsdFJklof",0)==0x99878FEE) ;
+    assert(asm_crc32c("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",0)==0x95DC2E4B) ;
+}
 
+
+int main() {
+    test();
+    printf("All test cases OK\n");
+}
